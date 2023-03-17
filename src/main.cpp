@@ -98,13 +98,13 @@ auto main() -> std::int32_t/*{{{*/
 					
 					switch ( resultado_de_busqueda ) {
 						case USUARIO_NO_ENCONTRADO:
-							std::cout << "No mames, ni estas registrado perro" << std::endl;
+							std::cout << "\n\nNo mames, ni estas registrado perro" << std::endl;
 							break;
 						case PASSWORD_INCORRECTO:
-							std::cout << "No mames, mete tu password bien qlero" << std::endl;
+							std::cout << "\n\nNo mames, mete tu password bien qlero" << std::endl;
 							break;
 						case PASSWORD_CORRECTO:
-							std::cout << "Buen ingreso perro" << std::endl;
+							std::cout << "\n\nBuen ingreso perro" << std::endl;
 							break;
 					}
 				}
@@ -121,16 +121,17 @@ auto main() -> std::int32_t/*{{{*/
 				cout << "\n\n\t\t\tDEBES INICIAR SESION COMO ADMINISTRADOR PARA TENER "
 						"ESTE PRIVILEGIO" << std::endl;
 				usuario_leido = leer_datos_usuario();
-				std::cout << usuario_leido.nombre << " - " << usuario_leido.password << std::endl;
+				// We should delete this next line for not to showing the entered data
+				// std::cout << usuario_leido.nombre << " - " << usuario_leido.password << std::endl;
 
 				if (	usuario_leido.nombre == admin.nombre and
 						usuario_leido.password == admin.password and
 						n_registrados < LIMITE_USUARIOS ) {
 
-					//registrar_usuario( usuarios_database, &n_registrados );
+					registrar_usuario( usuarios_database, &n_registrados );
 				}
 				else
-					cout<<"\n\n\t\t\tNO SE PUEDE INGRESAR"; 
+					cout << "\n\n\t\t\tNO SE PUEDE INGRESAR"; 
 
 				cout<<"\n\n\t\t\t\t\tQUIERES VOLVER AL MENU?: [S]= SI [N]=NO: ";
 				cin >> decision_continuar;
