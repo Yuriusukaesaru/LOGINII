@@ -28,9 +28,9 @@
  * 		: <tipo_de_entero>
  *
  * el tipo de entero que quieres que tenga tu enumeración */
-enum Opcion : const std::int16_t { INGRESAR = 1, REGISTRAR_USUARIO, SALIR }; // Para las opciones
+enum Opcion : std::int16_t { INGRESAR = 1, REGISTRAR_USUARIO, SALIR }; // Para las opciones
 enum Tecla : char { BACKSPACE = 8, ENTER = 13 }; // Para las teclas (valor ASCII)
-enum ResultadoDeBusqueda : const std::int16_t{ USUARIO_NO_ENCONTRADO, PASSWORD_INCORRECTO, PASSWORD_CORRECTO };
+enum ResultadoDeBusqueda : std::int16_t { USUARIO_NO_ENCONTRADO, PASSWORD_INCORRECTO, PASSWORD_CORRECTO };
 
 struct Usuario {
 	std::string nombre;
@@ -38,32 +38,18 @@ struct Usuario {
 };
 
 /* Aquí usamos una "referencia a una constante" (referencia a un valor temporal constante) para optimizar memoria */
-const std::int32_t &MAX_STRING{ 20 };
+const std::uint32_t &MAX_STRING{ 20 };
 const std::int32_t &LIMITE_USUARIOS{ 50 };
 
-/* El tipo de datos -auto- hace que el compilador "decida" el tipo de dato que tendrá tu variable en relación
- * al valor o tipo de retorno que le estás asignando.
- *
- * En este caso lo usamos para adoptar la nomenclatura de encabezado de función moderna usando el operador flecha.
- *
- * 		std::int32_t funcion();
- *
- * se puede escribir como
- *
- * 		auto funcion() -> std::int32_t;
- *
- * Al decirle el tipo de retorno de esta forma, el tipo -auto- de alguna manera
- * pierde funcionalidad, pero nos permite expresar los encabezados en este formato màs moderno, usado ademàs
- * por servidores de lenguaje y otros lenguajes como ObjectiveC. Ùsalo si te acomoda y te gusta */
-auto leer_datos_usuario() -> struct Usuario;
-auto buscar_usuario( const struct Usuario &_UsuarioLeido, const struct Usuario *_DataBase,
-		const std::int32_t &_Usuarios ) -> enum ResultadoDeBusqueda;
-auto registrar_usuario( struct Usuario *_BaseDatos, std::int32_t *_Usuarios ) -> void;
+struct Usuario leer_datos_usuario();
+enum ResultadoDeBusqueda buscar_usuario( const struct Usuario &_UsuarioLeido, const struct Usuario *_DataBase,
+		const std::int32_t &_Usuarios );
+void registrar_usuario( struct Usuario *_BaseDatos, std::int32_t *_Usuarios );
 
 using std::cout;
 using std::cin;
 
-auto main() -> std::int32_t/*{{{*/
+std::int32_t main()/*{{{*/
 {
 	struct Usuario usuarios_database[ LIMITE_USUARIOS ];
 	const struct Usuario &admin { { "SOYADMIN" }, { "CONTRASENIA" } };
@@ -72,10 +58,7 @@ auto main() -> std::int32_t/*{{{*/
 
 	std::int16_t opcion;
 
-	/* Los atributos son algo del C++ moderno, en este caso el atributo -maybe_unused- nos permite especificarle al
-	 * compilador que cierta variable "tal vez no la usemos, pero somos conscientes de ello". Recuerda que cuando
-	 * activamos los flags estrictos, hasta eso la hace de pedo. Con esto, nos deja de lanzar advertencia */
-	[[ maybe_unused ]] enum ResultadoDeBusqueda resultado_de_busqueda;
+	enum ResultadoDeBusqueda resultado_de_busqueda;
 	char decision_continuar{ '\0' };
 	bool continuar{ true };
 
@@ -91,20 +74,20 @@ auto main() -> std::int32_t/*{{{*/
 
 		switch ( opcion ) {
 
-			case Opcion::INGRESAR:
+			case ( Opcion::INGRESAR ):
 				if ( n_registrados > 0 ) {
 					usuario_leido = leer_datos_usuario();
 					resultado_de_busqueda = buscar_usuario( usuario_leido, usuarios_database, n_registrados );
 					
 					switch ( resultado_de_busqueda ) {
-						case USUARIO_NO_ENCONTRADO:
-							std::cout << "No mames, ni estas registrado perro" << std::endl;
+						case ResultadoDeBusqueda::USUARIO_NO_ENCONTRADO:
+							std::cout << "\n\nNo mames, ni estas registrado perro" << std::endl;
 							break;
-						case PASSWORD_INCORRECTO:
-							std::cout << "No mames, mete tu password bien qlero" << std::endl;
+						case ResultadoDeBusqueda::PASSWORD_INCORRECTO:
+							std::cout << "\n\nNo mames, mete tu password bien qlero" << std::endl;
 							break;
-						case PASSWORD_CORRECTO:
-							std::cout << "Buen ingreso perro" << std::endl;
+						case ResultadoDeBusqueda::PASSWORD_CORRECTO:
+							std::cout << "\n\nBuen ingreso perro" << std::endl;
 							break;
 					}
 				}
@@ -121,16 +104,17 @@ auto main() -> std::int32_t/*{{{*/
 				cout << "\n\n\t\t\tDEBES INICIAR SESION COMO ADMINISTRADOR PARA TENER "
 						"ESTE PRIVILEGIO" << std::endl;
 				usuario_leido = leer_datos_usuario();
-				std::cout << usuario_leido.nombre << " - " << usuario_leido.password << std::endl;
+				// We should delete this next line for not to showing the entered data
+				// std::cout << usuario_leido.nombre << " - " << usuario_leido.password << std::endl;
 
 				if (	usuario_leido.nombre == admin.nombre and
 						usuario_leido.password == admin.password and
 						n_registrados < LIMITE_USUARIOS ) {
 
-					//registrar_usuario( usuarios_database, &n_registrados );
+					registrar_usuario( usuarios_database, &n_registrados );
 				}
 				else
-					cout<<"\n\n\t\t\tNO SE PUEDE INGRESAR"; 
+					cout << "\n\n\t\t\tNO SE PUEDE INGRESAR"; 
 
 				cout<<"\n\n\t\t\t\t\tQUIERES VOLVER AL MENU?: [S]= SI [N]=NO: ";
 				cin >> decision_continuar;
@@ -150,7 +134,7 @@ auto main() -> std::int32_t/*{{{*/
 	} while( ( decision_continuar == 'S' or decision_continuar == 's')  and  continuar == true ) ;
 }/*}}}*/
 
-auto leer_datos_usuario() -> struct Usuario/*{{{*/
+struct Usuario leer_datos_usuario()/*{{{*/
 {
 	struct Usuario usuario { { "" }, { "" } };
 
@@ -163,7 +147,7 @@ auto leer_datos_usuario() -> struct Usuario/*{{{*/
 
 	std::cout << "\n\n\t\t\t*POR FAVOR TECLEE SU CONTRA: " << std::flush;
 	char caracter_leido;
-	[[ maybe_unused ]] bool continuar{ true };
+	bool continuar{ true };
 
 	while ( continuar ) {
 		caracter_leido = static_cast<char>( _getch() );
@@ -182,8 +166,8 @@ auto leer_datos_usuario() -> struct Usuario/*{{{*/
 	return usuario;
 }/*}}}*/
 
-auto buscar_usuario( const struct Usuario &_UsuarioLeido, const struct Usuario *_BaseDatos,
-		const std::int32_t &_UsuariosRegistrados ) -> enum ResultadoDeBusqueda
+enum ResultadoDeBusqueda buscar_usuario( const struct Usuario &_UsuarioLeido, const struct Usuario *_BaseDatos,
+		const std::int32_t &_UsuariosRegistrados )
 {
 	int32_t i{ 0 };
 
@@ -195,12 +179,12 @@ auto buscar_usuario( const struct Usuario &_UsuarioLeido, const struct Usuario *
 	 * porque hay cierto paralelismo (hasta estético) entre ambos returns, no se ve "truncado" */
 	if ( i < _UsuariosRegistrados ) {
 		if ( _UsuarioLeido.password == _BaseDatos->password ) // Salió antes -> SÍ LO ENCONTRÓ
-			return PASSWORD_CORRECTO;
+			return ResultadoDeBusqueda::PASSWORD_CORRECTO;
 		else
-			return PASSWORD_INCORRECTO;
+			return ResultadoDeBusqueda::PASSWORD_INCORRECTO;
 	}
 	else
-		return USUARIO_NO_ENCONTRADO;
+		return ResultadoDeBusqueda::USUARIO_NO_ENCONTRADO;
 }/*}}}*/
 
 auto registrar_usuario( struct Usuario *_BaseDatos, std::int32_t *_Usuarios ) -> void/*{{{*/
